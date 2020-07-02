@@ -2,3 +2,5 @@
 
 API from Open Weather Map. In the future will implement geolocation api and local storage to improve UI.
 Update: Local storage added!
+
+Update: Geolocation added!
