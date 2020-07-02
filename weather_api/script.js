@@ -11,7 +11,8 @@ const feelsLike = document.querySelector('#feels-like');
 const wind = document.querySelector('#wind');
 
 // API Key
-const apiKey = '8c83e89754d126b0d394cbb3bef41baf';
+const weatherKey = '8c83e89754d126b0d394cbb3bef41baf';
+const mapKey = 'a9LvCQ9nZ8pqbOHaPiCg0C2mZvNjQWFT';
 
 
 
@@ -23,7 +24,7 @@ function changeLocation() {
 }
 
 function fetchData(city, state) {
-  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},${state},us&appid=${apiKey}`)
+  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},${state},us&appid=${weatherKey}`)
       .then(response => response.json())
       .then(json => render(json, state));
 }
@@ -51,7 +52,7 @@ changeLocationBtn.addEventListener('click', changeLocation);
 
 
 
-// Run Code by default
+// Local Storage
 function renderStoredLocation() {
   const savedCity = localStorage.getItem('city');
   const savedState = localStorage.getItem('state');
@@ -59,3 +60,37 @@ function renderStoredLocation() {
 }
 
 renderStoredLocation();
+
+
+
+// Find User Location
+
+function findUserCity() {
+  if (!navigator.geolocation) {
+    document.querySelector('.alert').textContent = "Geolocation is not supported by your browser.";
+    return;
+  }
+  function success(position) {
+    const latitude = position.coords.latitude;
+    const longitude = position.coords.longitude;
+    reverseGeocoding(longitude, latitude);
+  }
+  function error() {
+    document.querySelector('.alert').textContent = "Unable to retrieve your location."
+  }
+  navigator.geolocation.getCurrentPosition(success, error);
+}
+
+function reverseGeocoding(longitude, latitude) {
+  fetch(`http://open.mapquestapi.com/geocoding/v1/reverse?key=${mapKey}&location=${latitude},${longitude}`)
+    .then(response => response.json())
+    .then(json => {
+      const city = json.results[0].locations[0].adminArea5;
+      const state = json.results[0].locations[0].adminArea3;
+      fetchData(city, state);
+    });
+}
+
+if (!localStorage.getItem('city')) {
+  findUserCity()
+};
