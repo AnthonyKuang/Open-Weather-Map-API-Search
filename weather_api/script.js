@@ -25,20 +25,23 @@ function changeLocation() {
 function fetchData(city, state) {
   fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city},${state},us&appid=${apiKey}`)
       .then(response => response.json())
-      .then(json => render(json));
+      .then(json => render(json, state));
 }
 
-function render(json) {
-  cityLocation.textContent = `${json.name}, ${stateName.value}`;
+function render(json, state) {
+  cityLocation.textContent = json.name;
   description.textContent = json.weather[0].description
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.substring(1))
     .join(' ');
-  temperature.textContent = `${(((json.main.temp - 273.15) * 1.8) + 32).toFixed(1) + ' F'} (${(json.main.temp - 273.15).toFixed(1) + ' C'})`;
+  temperature.textContent = `${(((json.main.temp - 273.15) * 1.8) + 32).toFixed(1) + ' °F'} (${(json.main.temp - 273.15).toFixed(1) + ' °C'})`;
   icon.src = `http://openweathermap.org/img/wn/${json.weather[0].icon}@2x.png`;
   humidity.textContent = `Relative Humidity: ${json.main.humidity}%`;
-  feelsLike.textContent = `Feels Like: ${(((json.main.feels_like - 273.15) * 1.8) + 32).toFixed(0) + ' F'} (${(json.main.feels_like - 273.15).toFixed(0) + ' C'})`;
+  feelsLike.textContent = `Feels Like: ${(((json.main.feels_like - 273.15) * 1.8) + 32).toFixed(0) + ' °F'} (${(json.main.feels_like - 273.15).toFixed(0) + ' °C'})`;
   wind.textContent = `From ${json.wind.deg}° at ${json.wind.speed} m/s`;
+
+  localStorage.setItem('city', json.name);
+  localStorage.setItem('state', state);
 }
 
 
@@ -49,4 +52,10 @@ changeLocationBtn.addEventListener('click', changeLocation);
 
 
 // Run Code by default
-fetchData('San Ramon', 'CA');
+function renderStoredLocation() {
+  const savedCity = localStorage.getItem('city');
+  const savedState = localStorage.getItem('state');
+  fetchData(savedCity, savedState);
+}
+
+renderStoredLocation();
